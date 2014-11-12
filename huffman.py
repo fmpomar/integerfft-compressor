@@ -4,7 +4,11 @@ from collections import Counter
 
 
 def encode(symb2freq):
-    """Huffman encode the given dict mapping symbols to weights"""
+    """
+        Huffman encode the given dict mapping symbols to weights
+    """
+    if len(symb2freq.keys()) == 1:
+        return {symb2freq.keys()[0]: '0'}
     heap = [[wt, [sym, ""]] for sym, wt in symb2freq.items()]
     heapify(heap)
     while len(heap) > 1:
@@ -19,6 +23,9 @@ def encode(symb2freq):
 
 
 def estimate(v):
+    """
+        Estimate size of an array after Huffman encoding
+    """
     counter = Counter(v)
     huff_dict = encode(counter)
     total_bits = 0
