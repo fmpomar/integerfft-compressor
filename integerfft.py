@@ -170,10 +170,13 @@ def inverse_fft_8(v):
 
 
 def dct_8(v):
+    # Transform reordered list
     efft = fft_8((list(v) + list(reversed(v)))[::2])
     result = [0]*8
+    # First and middle coeffs are equal
     result[0] = efft[0]
     result[4] = efft[4]
+
     for k in xrange(1, 4):
         (result[k], result[8-k]) = \
             dct_butterfly(efft[k], (8, k))
@@ -182,11 +185,14 @@ def dct_8(v):
 
 def inverse_dct_8(v):
     efft = [0]*8
+    # First and middle coeffs are equal
     efft[0] = v[0]
     efft[4] = v[4]
+
     for k in xrange(1, 4):
         efft[k] = inverse_dct_butterfly((v[k], v[8-k]), (8, k))
         efft[8-k] = efft[k].conjugate()
     iefft = inverse_fft_8(efft)
+    # Reorder back
     result = [x for t in zip(iefft[:4], list(reversed(iefft[4:]))) for x in t]
     return result
