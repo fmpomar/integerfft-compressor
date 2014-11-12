@@ -1,6 +1,7 @@
 import math
 import cmath
 import aux
+import numpy
 
 
 def lifting_up((x, y), alpha, int_factor):
@@ -87,6 +88,8 @@ def butterfly_b((x, y)):
 
 
 def inverse_butterfly_a(v):
+    (x, y) = v
+    v = (x.real, y.real)
     v = lifting_down(v, 1, -1)
     v = lifting_up(v, -0.5, -1)
     v = inverse_scaling(v, 1.0/math.sqrt(2))
@@ -106,7 +109,9 @@ def fft_8(v):
     #
     # First step (N = 1 to N = 2)
     #
-    result = [0]*8
+    aux_array_a = numpy.empty(8, complex)
+    aux_array_b = numpy.empty(8, complex)
+    result = aux_array_a
     (result[0], result[1]) = butterfly_a((v[0], v[1]))
     (result[2], result[3]) = butterfly_a((v[2], v[3]))
     (result[4], result[5]) = butterfly_a((v[4], v[5]))
@@ -115,7 +120,7 @@ def fft_8(v):
     # Second step (N = 2 to N = 4)
     #
     v = result
-    result = [0]*8
+    result = aux_array_b
     (result[0], result[2]) = butterfly_a((v[0], v[2]))
     (result[1], result[3]) = butterfly_b((v[1], v[3]))
     (result[4], result[6]) = butterfly_a((v[4], v[6]))
@@ -124,7 +129,7 @@ def fft_8(v):
     # Third step (N = 4 to N = 8)
     #
     v = result
-    result = [0]*8
+    result = aux_array_a
     (result[0], result[4]) = butterfly_a((v[0], v[4]))
     (result[1], result[5]) = butterfly((v[1], v[5]), (8, 1))
     (result[2], result[6]) = butterfly_b((v[2], v[6]))
@@ -139,8 +144,8 @@ def inverse_fft_8(v):
     """
     #
     # First step (N = 8 to N = 4)
-    #
-    result = [0]*8
+
+    result = numpy.empty(8, complex)
     (result[0], result[4]) = inverse_butterfly_a((v[0], v[4]))
     (result[1], result[5]) = inverse_butterfly((v[1], v[5]), (8, 1))
     (result[2], result[6]) = inverse_butterfly_b((v[2], v[6]))
@@ -150,7 +155,7 @@ def inverse_fft_8(v):
     # Second step (N = 4 to N = 2)
     #
     v = result
-    result = [0]*8
+    result = numpy.empty(8, complex)
     (result[0], result[2]) = inverse_butterfly_a((v[0], v[2]))
     (result[1], result[3]) = inverse_butterfly_b((v[1], v[3]))
     (result[4], result[6]) = inverse_butterfly_a((v[4], v[6]))
@@ -159,7 +164,7 @@ def inverse_fft_8(v):
     # Second step (N = 2 to N = 1)
     #
     v = result
-    result = [0]*8
+    result = numpy.empty(8, int)
     (result[0], result[1]) = inverse_butterfly_a((v[0], v[1]))
     (result[2], result[3]) = inverse_butterfly_a((v[2], v[3]))
     (result[4], result[5]) = inverse_butterfly_a((v[4], v[5]))
@@ -171,11 +176,12 @@ def inverse_fft_8(v):
 
 def dct_8(v):
     # Transform reordered list
-    efft = fft_8((list(v) + list(reversed(v)))[::2])
-    result = [0]*8
+    v = numpy.array(v)
+    efft = fft_8(numpy.hstack((v, v[::-1]))[::2])
+    result = numpy.empty(8, int)
     # First and middle coeffs are equal
-    result[0] = efft[0]
-    result[4] = efft[4]
+    result[0] = efft[0].real
+    result[4] = efft[4].real
 
     for k in xrange(1, 4):
         (result[k], result[8-k]) = \
@@ -184,7 +190,7 @@ def dct_8(v):
 
 
 def inverse_dct_8(v):
-    efft = [0]*8
+    efft = numpy.empty(8, complex)
     # First and middle coeffs are equal
     efft[0] = v[0]
     efft[4] = v[4]
@@ -194,5 +200,13 @@ def inverse_dct_8(v):
         efft[8-k] = efft[k].conjugate()
     iefft = inverse_fft_8(efft)
     # Reorder back
-    result = [x for t in zip(iefft[:4], list(reversed(iefft[4:]))) for x in t]
+    result = numpy.empty(8, int)
+    result[0] = iefft[0]
+    result[1] = iefft[7]
+    result[2] = iefft[1]
+    result[3] = iefft[6]
+    result[4] = iefft[2]
+    result[5] = iefft[5]
+    result[6] = iefft[3]
+    result[7] = iefft[4]
     return result

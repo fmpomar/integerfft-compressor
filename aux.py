@@ -1,8 +1,11 @@
+import numpy
+
+
 def convert_array_8(v):
     """
         Binary flip an array of 8 elements
     """
-    result = list(v)
+    result = numpy.empty(8, int)
     result[0b000] = v[0b000]
     result[0b001] = v[0b100]
     result[0b010] = v[0b010]
