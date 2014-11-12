@@ -170,7 +170,7 @@ def inverse_fft_8(v):
 
 
 def dct_8(v):
-    efft = fft_8((v + list(reversed(v)))[::2])
+    efft = fft_8((list(v) + list(reversed(v)))[::2])
     result = [0]*8
     result[0] = efft[0]
     result[4] = efft[4]
