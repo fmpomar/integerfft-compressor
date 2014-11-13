@@ -8,18 +8,28 @@ def lifting_up((x, y), alpha, int_factor):
     """
         Implements an upper triangular 2x2 matrix lifting scheme
         int_factor allows application reversal
+        As input may be a complex, we round up the real and imaginary parts
     """
-    return (x + int_factor*int(round(alpha*y.real)) +
-            int_factor*int(round(alpha*y.imag)), y)
+    if y.imag != 0:
+        return (x + int_factor*int(round(alpha*y.real)) +
+                1j*int_factor*int(round(alpha*y.imag)), y)
+    else:
+        # if it is not a complex, we try to keep it as an integer
+        return (x + int_factor*int(round(alpha*y.real)), y)
 
 
 def lifting_down((x, y), alpha, int_factor):
     """
         Implements an upper triangular 2x2 matrix lifting scheme
         int_factor allows application reversal
+        As input may be a complex, we round up the real and imaginary parts
     """
-    return (x, y + int_factor*int(round(alpha*x.real)) +
-            int_factor*int(round(alpha*x.imag)))
+    if x.imag != 0:
+        return (x, y + int_factor*int(round(alpha*x.real)) +
+                1j*int_factor*int(round(alpha*x.imag)))
+    else:
+        # if it is not a complex, we try to keep it as an integer
+        return (x, y + int_factor*int(round(alpha*x.real)))
 
 
 def rotation(v, angle):
@@ -69,7 +79,7 @@ def dct_butterfly(x, (N, j)):
         Integer DCT 'butterfly' scheme
     """
     angle = math.pi*j/(2.0*N)
-    return rotation((int(x.real), int(x.imag)), angle)
+    return rotation((x.real, x.imag), angle)
 
 
 def inverse_dct_butterfly((x, y), (N, j)):
@@ -141,7 +151,7 @@ def inverse_butterfly_b((x, y)):
     """
         Inverse Integer FFT conjugation (scheme b) butterfly
     """
-    return (int(x.real), int(x.imag))
+    return (x.real, x.imag)
 
 
 def fft_8(v):
