@@ -234,9 +234,18 @@ def dct_8(v):
         based on Integer FFT
     """
     # Transform reordered list
-    v = numpy.array(v)
-    efft = fft_8(numpy.hstack((v, v[::-1]))[::2])
-    result = numpy.empty(8, int)
+    reordered = numpy.empty(8, int)
+    reordered[0] = v[0]
+    reordered[7] = v[1]
+    reordered[1] = v[2]
+    reordered[6] = v[3]
+    reordered[2] = v[4]
+    reordered[5] = v[5]
+    reordered[3] = v[6]
+    reordered[4] = v[7]
+    efft = fft_8(reordered)
+    # Reuse array
+    result = reordered
     # First and middle coeffs are equal
     result[0] = efft[0].real
     result[4] = efft[4].real
